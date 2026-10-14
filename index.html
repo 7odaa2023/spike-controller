@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPIKE Controller - Assumou Schools</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  padding: 18px 10px;
+  background: #10151d;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.bluetooth-container {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.bt-btn {
+  border: 2px solid #555;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.bt-btn.active-green {
+  background: #107c10;
+  border-color: #2ecc71;
+  box-shadow: 0 0 15px rgba(16, 124, 16, 0.6);
+}
+
+.bt-btn.inactive-red {
+  background: #c0392b;
+  border-color: #e74c3c;
+  box-shadow: 0 0 10px rgba(192, 57, 43, 0.4);
+}
+
+.controller-wrapper {
+  position: relative;
+  max-width: 680px;
+  margin: 25px auto;
+}
+
+/* مقابض الإكس بوكس الاحترافية الأصلية */
+.controller-wrapper::before,
+.controller-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: -45px;
+  width: 120px;
+  height: 85px;
+  background: #191f28;
+  border: 3px solid #ff5500;
+  z-index: 1;
+}
+
+.controller-wrapper::before {
+  left: 30px;
+  border-bottom-left-radius: 50px;
+  border-bottom-right-radius: 30px;
+  transform: rotate(-25deg);
+  box-shadow: inset -5px -5px 12px #11151c, -4px 8px 12px rgba(0,0,0,0.4);
+}
+
+.controller-wrapper::after {
+  right: 30px;
+  border-bottom-right-radius: 50px;
+  border-bottom-left-radius: 30px;
+  transform: rotate(25deg);
+  box-shadow: inset 5px -5px 12px #11151c, 4px 8px 12px rgba(0,0,0,0.4);
+}
+
+.controller {
+  position: relative;
+  z-index: 2;
+  max-width: 680px;
+  min-height: 360px;
+  padding: 55px 16px 34px 16px;
+  display: flex;
+  flex-direction: row;
+  direction: ltr;
+  align-items: center;
+  justify-content: space-around;
+  gap: 12px;
+  background: #191f28;
+  border: 3px solid #ff5500;
+  border-radius: 75px 75px 50px 50px;
+  box-shadow: inset 0 7px 15px #11151c,
+              0 0 25px rgba(255, 85, 0, 0.4);
+}
+
+.controller-top-title {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: #ffbb88;
+  z-index: 3;
+  text-transform: uppercase;
+}
+
+.live-command-box {
+  position: absolute;
+  top: 42px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #12161f;
+  border: 1px solid #ff5500;
+  border-radius: 6px;
+  padding: 2px 10px;
+  font-size: 13px;
+  color: #2ecc71;
+  font-family: monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+  z-index: 3;
+  min-width: 60px;
+  text-align: center;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+}
+
+.side {
+  width: 38%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.center-section {
+  width: 24%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* تأثير التوهج الذهبي المستمر لمدارس السمو */
+@keyframes goldGlow {
+  0% {
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 10px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 25px rgba(255, 215, 0, 0.8), 0 0 35px rgba(255, 190, 0, 0.5);
+  }
+  100% {
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6), 0 0 10px rgba(255, 215, 0, 0.3);
+  }
+}
+
+.school-badge {
+  background: #12161f;
+  color: #ffd700;
+  padding: 14px 10px;
+  border-radius: 14px;
+  font-weight: bold;
+  border: 2px solid #ffd700;
+  width: 100%;
+  max-width: 155px;
+  text-align: center;
+  animation: goldGlow 3s infinite ease-in-out;
+}
+
+.school-name-ar {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 4px;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+.school-name-en {
+  font-size: 11px;
+  color: #ffeaa7;
+  letter-spacing: 0.5px;
+}
+
+.speed-control {
+  background: #12161f;
+  border: 2px solid #ff5500;
+  border-radius: 14px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 130px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.speed-btn {
+  background: #ff5500;
+  color: white;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.1s;
+}
+
+.speed-btn:active {
+  transform: scale(0.9);
+  background: #ff7700;
+}
+
+.speed-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffbb88;
+}
+
+.speed-label {
+  font-size: 9px;
+  color: #9ca3af;
+  margin-top: 1px;
+  letter-spacing: 0.5px;
+}
+
+.label {
+  font-size: 13px;
+  color: #ffbb88;
+  direction: rtl;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.dpad {
+  width: 145px;
+  height: 145px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  direction: ltr;
+}
+
+.btn {
+  border: 1px solid #4b5563;
+  color: white;
+  font-weight: bold;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #111820;
+}
+
+.btn:active,
+.btn.pressed {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #111820;
+  filter: brightness(1.3);
+}
+
+.direction {
+  background: #222a36;
+  border-radius: 9px;
+  font-size: 24px;
+}
+
+.up {
+  grid-column: 2;
+  grid-row: 1;
+  border-radius: 10px 10px 4px 4px;
+}
+
+.left {
+  grid-column: 1;
+  grid-row: 2;
+  border-radius: 10px 4px 4px 10px;
+}
+
+.right {
+  grid-column: 3;
+  grid-row: 2;
+  border-radius: 4px 10px 10px 4px;
+}
+
+.down {
+  grid-column: 2;
+  grid-row: 3;
+  border-radius: 4px 4px 10px 10px;
+}
+
+.red {
+  background: #d92736;
+  border-color: #f87171;
+}
+
+.blue {
+  background: #1769df;
+  border-color: #60a5fa;
+}
+
+.hint {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #cbd5e1;
+  direction: rtl;
+}
+
+@media (max-width: 480px) {
+  .controller {
+    min-height: 330px;
+    padding: 55px 6px 20px 6px;
+    gap: 6px;
+    border-radius: 50px 50px 40px 40px;
+  }
+
+  .controller-wrapper::before,
+  .controller-wrapper::after {
+    width: 100px;
+    height: 75px;
+    bottom: -38px;
+  }
+
+  .dpad {
+    width: 120px;
+    height: 120px;
+    gap: 3px;
+  }
+
+  .direction {
+    font-size: 20px;
+  }
+
+  .side {
+    gap: 8px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="bluetooth-container">
+  <button id="connectBtn" class="bt-btn inactive-red">CONNECT BLUETOOTH</button>
+  <button id="disconnectBtn" class="bt-btn active-green">DISCONNECT</button>
+</div>
+
+<div class="controller-wrapper">
+  <div class="controller">
+    <div class="controller-top-title">SPIKE</div>
+    <div id="liveCmd" class="live-command-box">-</div>
+
+    <!-- Left D-Pad: Movement -->
+    <section class="side">
+      <div class="label">MOVEMENT</div>
+
+      <div class="dpad">
+        <button class="btn direction up" data-cmd="F" data-stop="S">▲</button>
+        <button class="btn direction left" data-cmd="L" data-stop="S">◀</button>
+        <button class="btn direction right" data-cmd="R" data-stop="S">▶</button>
+        <button class="btn direction down" data-cmd="B" data-stop="S">▼</button>
+      </div>
+
+      <div class="hint">
+        <br>
+        
+      </div>
+    </section>
+
+    <!-- Center Section: School Name & Speed -->
+    <section class="center-section">
+      <div class="school-badge">
+        <div class="school-name-ar">مدارس السمو</div>
+        <div class="school-name-en">Assumou Schools</div>
+      </div>
+
+      <div>
+        <div class="speed-control">
+          <button class="speed-btn" onclick="changeSpeed(-10)">-</button>
+          <span id="speedDisplay" class="speed-value">40%</span>
+          <button class="speed-btn" onclick="changeSpeed(10)">+</button>
+        </div>
+        <div class="speed-label">ROBOT SPEED</div>
+      </div>
+    </section>
+
+    <!-- Right D-Pad: Lift and Gripper -->
+    <section class="side">
+      <div class="label">LIFT & GRIPPER</div>
+
+      <div class="dpad">
+        <button class="btn direction up red" data-cmd="U" data-stop="T">▲</button>
+        <button class="btn direction left blue" data-cmd="C" data-stop="G">◀</button>
+        <button class="btn direction right blue" data-cmd="O" data-stop="G">▶</button>
+        <button class="btn direction down red" data-cmd="D" data-stop="T">▼</button>
+      </div>
+
+      <div class="hint">
+        <span style="color:#ff7078">Red: Lift</span> | <span style="color:#60a5fa">Blue: Gripper</span><br>
+        
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+const SERVICE = "c5f50001-8280-46da-89f4-6d8051e4aeef";
+const CHARACTERISTIC = "c5f50002-8280-46da-89f4-6d8051e4aeef";
+
+let device = null;
+let characteristic = null;
+let connected = false;
+let commandQueue = Promise.resolve();
+const activeButtons = new Map();
+let currentSpeed = 40;
+
+const connectBtn = document.getElementById("connectBtn");
+const disconnectBtn = document.getElementById("disconnectBtn");
+const liveCmdDisplay = document.getElementById("liveCmd");
+
+function playConnectionSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.15);
+    
+    gain1.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    
+    osc1.start();
+    osc1.stop(audioCtx.currentTime + 0.3);
+  } catch (e) {
+    console.log("Audio not supported or blocked");
+  }
+}
+
+function updateUIState() {
+  if (connected) {
+    connectBtn.className = "bt-btn active-green";
+    disconnectBtn.className = "bt-btn inactive-red";
+    connectBtn.textContent = "CONNECTED ✓";
+    playConnectionSound();
+  } else {
+    connectBtn.className = "bt-btn inactive-red";
+    disconnectBtn.className = "bt-btn active-green";
+    connectBtn.textContent = "CONNECT BLUETOOTH";
+    liveCmdDisplay.textContent = "-";
+  }
+}
+
+function changeSpeed(amount) {
+  currentSpeed += amount;
+  if (currentSpeed > 100) currentSpeed = 100;
+  if (currentSpeed < 40) currentSpeed = 40;
+  
+  document.getElementById("speedDisplay").textContent = currentSpeed + "%";
+  sendCommand("V" + currentSpeed);
+}
+
+async function connectBluetooth() {
+  try {
+    if (!navigator.bluetooth) {
+      alert("متصفحك لا يدعم البلوتوث. يرجى استخدام Google Chrome أو Microsoft Edge.");
+      return;
+    }
+
+    device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: [SERVICE]
+    });
+
+    device.addEventListener("gattserverdisconnected", () => {
+      handleDisconnect();
+    });
+
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService(SERVICE);
+    characteristic = await service.getCharacteristic(CHARACTERISTIC);
+
+    connected = true;
+    updateUIState();
+
+  } catch (error) {
+    console.error("خطأ الاتصال: " + error);
+  }
+}
+
+function disconnectBluetooth() {
+  if (device && device.gatt.connected) {
+    device.gatt.disconnect();
+  }
+  handleDisconnect();
+}
+
+function handleDisconnect() {
+  connected = false;
+  characteristic = null;
+  activeButtons.clear();
+  document.querySelectorAll(".pressed").forEach(button => {
+    button.classList.remove("pressed");
+  });
+  updateUIState();
+}
+
+function sendCommand(command) {
+  liveCmdDisplay.textContent = command;
+
+  if (!connected || !characteristic) return;
+
+  commandQueue = commandQueue.then(async () => {
+    if (!connected || !characteristic) return;
+
+    const payload = new TextEncoder().encode(command);
+    const packet = new Uint8Array(payload.length + 1);
+
+    packet[0] = 6;
+    packet.set(payload, 1);
+
+    await characteristic.writeValueWithResponse(packet);
+
+  }).catch(error => {
+    console.error("خطأ الإرسال: " + error);
+  });
+}
+
+function pressButton(button, event) {
+  event.preventDefault();
+  if (!connected || activeButtons.has(button)) return;
+
+  activeButtons.set(button, {
+    pointerId: event.pointerId,
+    stopCommand: button.dataset.stop
+  });
+
+  button.classList.add("pressed");
+
+  try {
+    button.setPointerCapture(event.pointerId);
+  } catch (_) {}
+
+  sendCommand(button.dataset.cmd);
+}
+
+function releaseButton(button, event) {
+  const active = activeButtons.get(button);
+  if (!active) return;
+
+  if (event && event.pointerId !== active.pointerId) return;
+
+  activeButtons.delete(button);
+  button.classList.remove("pressed");
+
+  sendCommand(active.stopCommand);
+}
+
+connectBtn.addEventListener("click", connectBluetooth);
+disconnectBtn.addEventListener("click", disconnectBluetooth);
+
+document.querySelectorAll("[data-cmd]").forEach(button => {
+  // منع ظهور قوائم أندرويد المنبثقة عند الضغط المطول
+  button.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    return false;
+  });
+
+  button.addEventListener("touchstart", e => {
+    e.preventDefault();
+    pressButton(button, e);
+  }, { passive: false });
+
+  button.addEventListener("touchend", e => {
+    e.preventDefault();
+    releaseButton(button, e);
+  });
+
+  button.addEventListener("touchcancel", e => {
+    releaseButton(button, e);
+  });
+
+  button.addEventListener("pointerdown", event => pressButton(button, event));
+  button.addEventListener("pointerup", event => releaseButton(button, event));
+  button.addEventListener("pointercancel", event => releaseButton(button, event));
+  button.addEventListener("lostpointercapture", () => releaseButton(button));
+});
+
+updateUIState();
+</script>
+
+</body>
+</html>
